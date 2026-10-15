@@ -1,0 +1,10 @@
+{
+  "name": "gemini-chatbot-frontend",
+  "version": "1.0.0",
+  "description": "Frontend UI for Gemini Nexus Chatbot",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  }
+}

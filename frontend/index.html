@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gemini Nexus - Modern AI Chatbot with Supabase</title>
+  <meta name="description" content="A modern, full-stack Gemini AI chatbot showcasing clean architectural separation between Frontend, Backend, and Supabase." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Load Dynamic Frontend Environment Configuration -->
+  <script src="/env.js"></script>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand-wrapper">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Gemini Nexus</h1>
+          <p>
+            <span id="backend-status" class="header-status-pill">
+              <span class="status-dot"></span>
+              <span id="backend-status-text">Connecting...</span>
+            </span>
+            <span id="supabase-status" class="header-status-pill offline" style="margin-left: 6px;" title="Supabase Database Status">
+              <span class="status-dot"></span>
+              <span id="supabase-status-text">Supabase: Not Configured</span>
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Architecture Explanation Modal Trigger -->
+        <button id="btn-open-arch" class="btn-header highlight" title="View Frontend vs Backend vs Supabase Architecture">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+          <span>Architecture</span>
+        </button>
+
+        <!-- Settings / API Key Button -->
+        <button id="btn-open-settings" class="btn-header" title="Configure API Keys and Supabase Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span id="api-key-header-status">Settings</span>
+        </button>
+
+        <!-- Clear Chat Button -->
+        <button id="btn-clear-chat" class="btn-header" title="Clear current conversation">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          <span>Clear</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Chat Workspace -->
+    <main class="chat-main">
+      <div id="chat-history" class="chat-history">
+        <div class="chat-content-width">
+          
+          <!-- Empty / Welcome Hero State -->
+          <div id="welcome-hero" class="welcome-hero">
+            <div class="hero-orb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+              </svg>
+            </div>
+            <h2>Meet Gemini Nexus</h2>
+            <p>A full-stack conversational AI powered by Google Gemini and Supabase with strict architectural separation between Frontend and Backend.</p>
+
+            <div class="architecture-callout-card">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+              <p>
+                <strong>Security Guarantee:</strong> Your Gemini API key and Supabase Service Role key are isolated on the backend (<code>backend/.env</code>). The browser client only touches public anon keys (<code>frontend/.env</code>).
+              </p>
+            </div>
+
+            <div class="prompt-suggestions-grid">
+              <div class="suggestion-card" data-prompt="Explain the difference between Frontend, Backend, and Supabase in this application.">
+                <div class="card-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                  </svg>
+                </div>
+                <div class="card-text">
+                  <h4>Fullstack Architecture</h4>
+                  <p>Compare Frontend, Backend, and Supabase roles</p>
+                </div>
+              </div>
+
+              <div class="suggestion-card" data-prompt="How does Supabase Row Level Security (RLS) protect client data from the frontend?">
+                <div class="card-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  </svg>
+                </div>
+                <div class="card-text">
+                  <h4>Supabase RLS Security</h4>
+                  <p>Learn how Anon keys work safely in browser apps</p>
+                </div>
+              </div>
+
+              <div class="suggestion-card" data-prompt="Write a clean Node.js script using Server-Sent Events (SSE) to stream text to a browser.">
+                <div class="card-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                  </svg>
+                </div>
+                <div class="card-text">
+                  <h4>SSE Streaming Code</h4>
+                  <p>Generate production-grade real-time token streaming</p>
+                </div>
+              </div>
+
+              <div class="suggestion-card" data-prompt="Explain Quantum Computing in simple terms using analogies.">
+                <div class="card-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                  </svg>
+                </div>
+                <div class="card-text">
+                  <h4>Quantum Computing</h4>
+                  <p>Understand qubits and superposition simply</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Chat Message Thread -->
+          <div id="messages-container" class="messages-wrapper" style="display: none;"></div>
+
+        </div>
+      </div>
+
+      <!-- Chat Footer / Input -->
+      <footer class="chat-footer">
+        <div class="chat-content-width">
+          <div class="input-container-card">
+            <div class="input-row">
+              <textarea
+                id="chat-input"
+                rows="1"
+                placeholder="Message Gemini... (Shift + Enter for new line)"
+                autocomplete="off"
+              ></textarea>
+
+              <div class="input-actions">
+                <!-- Stop Generation Button -->
+                <button id="btn-stop-streaming" class="btn-stop" title="Stop generating">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+                  </svg>
+                </button>
+
+                <!-- Send Button -->
+                <button id="btn-send-message" class="btn-send" title="Send message" disabled>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="input-toolbar">
+              <div class="toolbar-left">
+                <!-- Model Selector -->
+                <div class="model-select-wrapper">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                  </svg>
+                  <select id="select-model" title="Select Gemini Model">
+                    <option value="gemini-2.5-flash" selected>Gemini 2.5 Flash</option>
+                    <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                    <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                    <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                  </select>
+                </div>
+
+                <!-- Stream Toggle -->
+                <label class="stream-toggle-wrapper" title="Stream words token-by-token in real time">
+                  <input type="checkbox" id="check-streaming" checked />
+                  <span>Real-time Stream</span>
+                </label>
+              </div>
+
+              <div class="toolbar-right">
+                <span id="char-counter">0 chars</span>
+              </div>
+            </div>
+          </div>
+
+          <p class="footer-disclaimer">
+            Gemini may produce inaccurate information. Conversations are proxied via Node.js backend and backed by Supabase.
+          </p>
+        </div>
+      </footer>
+    </main>
+
+    <!-- Architecture Modal (Frontend vs Backend vs Supabase) -->
+    <div id="modal-architecture" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            Full-Stack Architecture: Frontend vs. Backend vs. Supabase
+          </h3>
+          <button class="btn-close-modal" data-close="modal-architecture" title="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Flow Diagram -->
+          <div class="arch-flow-diagram">
+            <div class="flow-steps">
+              <div class="flow-step-box frontend">
+                <div class="flow-step-title">Frontend Client</div>
+                <div class="flow-step-desc">HTML/CSS/JS (Browser)</div>
+                <div style="font-size: 0.65rem; color: #38bdf8; margin-top: 4px;"><code>frontend/.env</code> (Anon Key)</div>
+              </div>
+              <div class="flow-arrow">⇄</div>
+              <div class="flow-step-box backend">
+                <div class="flow-step-title">Node.js Backend</div>
+                <div class="flow-step-desc">Express API (Port 5000)</div>
+                <div style="font-size: 0.65rem; color: #a5b4fc; margin-top: 4px;"><code>backend/.env</code> (Service Key)</div>
+              </div>
+              <div class="flow-arrow">⇄</div>
+              <div class="flow-step-box gemini">
+                <div class="flow-step-title">Supabase &amp; Gemini</div>
+                <div class="flow-step-desc">PostgreSQL &amp; Cloud LLM</div>
+                <div style="font-size: 0.65rem; color: #34d399; margin-top: 4px;">PostgreSQL / AI Inference</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comparison Grid -->
+          <div class="arch-cards-grid">
+            <div class="arch-card frontend">
+              <h4>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+                Frontend (.env)
+              </h4>
+              <ul>
+                <li><strong>Public Keys Only:</strong> Holds <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code>.</li>
+                <li><strong>Safe for Browser:</strong> The Anon key is protected by Supabase Row Level Security (RLS) policies.</li>
+                <li><strong>Direct Database Reads:</strong> Can subscribe to realtime chat updates via Supabase JS client.</li>
+                <li><strong>Zero Private Leaks:</strong> Never contains Gemini API keys or Database Admin keys.</li>
+              </ul>
+            </div>
+
+            <div class="arch-card backend">
+              <h4>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                  <rect x="9" y="9" width="6" height="6"></rect>
+                  <line x1="9" y1="1" x2="9" y2="4"></line>
+                  <line x1="15" y1="1" x2="15" y2="4"></line>
+                  <line x1="9" y1="20" x2="9" y2="23"></line>
+                  <line x1="15" y1="20" x2="15" y2="23"></line>
+                </svg>
+                Backend (.env)
+              </h4>
+              <ul>
+                <li><strong>Privileged Secrets:</strong> Holds <code>GEMINI_API_KEY</code> and <code>SUPABASE_SERVICE_ROLE_KEY</code>.</li>
+                <li><strong>Elevated Database Admin:</strong> Can bypass RLS to perform system migrations, cleanup, and audit logs.</li>
+                <li><strong>AI Orchestrator:</strong> Manages conversation history, invokes <code>@google/genai</code>, and streams tokens.</li>
+                <li><strong>Safety Shield:</strong> Prevents unauthorized users from depleting quotas or accessing private data.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 8px; padding: 12px 16px; margin-top: 14px;">
+            <p style="font-size: 0.82rem; color: #a7f3d0; margin: 0;">
+              <strong>Database Schema:</strong> To initialize the Supabase tables, open the Supabase SQL Editor and run the included <code>supabase_schema.sql</code> file located at the project root.
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-primary" data-close="modal-architecture">Got It</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings & API Keys Modal -->
+    <div id="modal-settings" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            Configuration &amp; Environment Variables
+          </h3>
+          <button class="btn-close-modal" data-close="modal-settings" title="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Gemini Section -->
+          <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-subtle);">
+            <h4 style="font-size: 0.95rem; color: #818cf8; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+              <span>🤖</span> Google Gemini Configuration
+            </h4>
+            <div class="form-group">
+              <label class="form-label" for="input-api-key">Gemini API Key (Backend)</label>
+              <div class="input-with-button">
+                <input
+                  type="password"
+                  id="input-api-key"
+                  class="form-input"
+                  placeholder="AIzaSy..."
+                  autocomplete="off"
+                />
+                <button id="btn-toggle-key-visibility" class="btn-secondary" type="button" title="Show/Hide Key">
+                  👁️
+                </button>
+                <button id="btn-test-key" class="btn-secondary" type="button">
+                  Test Key
+                </button>
+              </div>
+              <p class="form-help">
+                Stored in <code>backend/.env</code>. Get a key at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>.
+              </p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="modal-select-model">Default AI Model</label>
+              <select id="modal-select-model" class="form-select">
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended - Fastest &amp; Versatile)</option>
+                <option value="gemini-2.5-pro">Gemini 2.5 Pro (Deep Reasoning &amp; Complex Analysis)</option>
+                <option value="gemini-1.5-flash">Gemini 1.5 Flash (Ultra-low Latency)</option>
+                <option value="gemini-1.5-pro">Gemini 1.5 Pro (Large Context Window)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Supabase Section -->
+          <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-subtle);">
+            <h4 style="font-size: 0.95rem; color: #34d399; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+              <span>⚡</span> Supabase Configuration
+            </h4>
+            <div class="form-group">
+              <label class="form-label" for="input-supabase-url">Supabase Project URL</label>
+              <input
+                type="text"
+                id="input-supabase-url"
+                class="form-input"
+                placeholder="https://xyzcompany.supabase.co"
+                autocomplete="off"
+              />
+              <p class="form-help">Present in both <code>frontend/.env</code> and <code>backend/.env</code>.</p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="input-supabase-anon-key">Supabase Anon Public Key</label>
+              <div class="input-with-button">
+                <input
+                  type="password"
+                  id="input-supabase-anon-key"
+                  class="form-input"
+                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..."
+                  autocomplete="off"
+                />
+                <button id="btn-test-supabase" class="btn-secondary" type="button">
+                  Test Supabase
+                </button>
+              </div>
+              <p class="form-help">
+                Safe for <code>frontend/.env</code> (protected by RLS). Obtain from Supabase &gt; Project Settings &gt; API.
+              </p>
+            </div>
+          </div>
+
+          <!-- Generation Settings -->
+          <div>
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                <label class="form-label" for="range-temperature" style="margin-bottom: 0;">Creativity (Temperature): <span id="temp-val">0.7</span></label>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">0.0 = Precise • 1.0 = Creative</span>
+              </div>
+              <input
+                type="range"
+                id="range-temperature"
+                min="0"
+                max="1"
+                step="0.05"
+                value="0.7"
+                style="width: 100%; accent-color: #6366f1; cursor: pointer;"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="textarea-system-prompt">System Instructions (AI Persona)</label>
+              <textarea
+                id="textarea-system-prompt"
+                class="form-textarea"
+                rows="2"
+                placeholder="You are an intelligent, helpful, and concise AI assistant powered by Google Gemini..."
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" data-close="modal-settings">Cancel</button>
+          <button id="btn-save-settings" class="btn-primary">Save &amp; Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+  </div>
+
+  <!-- Main JavaScript App -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

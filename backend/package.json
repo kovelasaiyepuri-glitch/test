@@ -1,0 +1,21 @@
+{
+  "name": "gemini-chatbot-backend",
+  "version": "1.0.0",
+  "description": "Backend API server for Gemini Chatbot",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "migrate": "node scripts/migrate.js",
+    "db:push": "node scripts/migrate.js"
+  },
+  "dependencies": {
+    "@google/genai": "^2.29.1",
+    "@supabase/supabase-js": "^2.117.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pg": "^8.23.1"
+  }
+}

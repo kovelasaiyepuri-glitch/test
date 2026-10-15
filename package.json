@@ -1,0 +1,17 @@
+{
+  "name": "gemini-chatbot-fullstack",
+  "version": "1.0.0",
+  "description": "Full-stack Gemini Chatbot with clear Frontend and Backend separation",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node --watch backend/server.js",
+    "install:backend": "npm install --prefix backend",
+    "backend": "npm run dev --prefix backend",
+    "migrate": "npm run migrate --prefix backend",
+    "db:push": "npm run db:push --prefix backend"
+  },
+  "keywords": ["gemini", "ai", "chatbot", "frontend", "backend", "fullstack", "supabase"],
+  "author": "",
+  "license": "MIT"
+}
